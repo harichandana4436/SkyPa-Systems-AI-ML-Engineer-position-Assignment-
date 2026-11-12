@@ -2,15 +2,17 @@
 
 ## Project Overview
 
-This project is developed as part of the SkyPa Systems technical assessment. The main objective is to predict the outcome of insurance claims based on details such as payer, provider, CPT code, diagnosis code, billed amount, and patient age.
+This project focuses on predicting insurance claim outcomes using Machine Learning. The model predicts whether an insurance claim will be **Paid, Partially_Paid, or Denied** based on details such as payer, provider, CPT code, diagnosis code, billed amount, and patient age.
 
-The project uses Python and Machine Learning to classify insurance claims into three categories: Paid, Partially Paid, and Denied. It also includes a FastAPI application that allows users to submit claim details and receive predictions through an API.
+The project uses a synthetic insurance claims dataset and a Random Forest classification model. A FastAPI application is also developed to accept claim details and return predictions with class probabilities.
 
 ## Technologies Used
 
 - Python
-- Pandas and NumPy
-- Matplotlib and Seaborn
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
 - Scikit-learn
 - Imbalanced-learn
 - Random Forest Classifier
@@ -20,118 +22,22 @@ The project uses Python and Machine Learning to classify insurance claims into t
 
 ## Dataset Description
 
-A synthetic dataset containing 500 insurance claim records was created for this project.
+The dataset contains synthetic insurance claim records with the following columns:
 
-The dataset contains the following columns:
+- `id` – Unique claim identifier
+- `payer` – Insurance company
+- `provider` – Healthcare provider
+- `cpt_code` – Medical procedure code
+- `diagnosis_code` – Patient diagnosis code
+- `billed_amount` – Amount charged for the claim
+- `patient_age` – Age of the patient
+- `status` – Final claim outcome
 
-| Column | Description |
-|---|---|
-| id | Unique claim ID |
-| payer | Insurance company |
-| provider | Healthcare provider |
-| cpt_code | Medical procedure code |
-| diagnosis_code | Diagnosis code |
-| billed_amount | Amount charged for the claim |
-| patient_age | Age of the patient |
-| status | Claim outcome |
-
-The target variable is `status`, which contains three classes:
+The dataset contains three target classes:
 
 - Paid – 70%
 - Partially_Paid – 20%
 - Denied – 10%
-
-The dataset is synthetic and intended for learning and assessment purposes.
-
-## Project Workflow
-
-### 1. Data Generation
-
-Created 500 synthetic insurance claim records with the required columns and claim status distribution. Illustrative risk-based rules were used to assign claim outcomes so that the model could learn patterns from the generated data.
-
-### 2. Data Cleaning
-
-Loaded the generated dataset and checked for missing values, duplicate records, invalid ages, invalid billed amounts, and inconsistent claim statuses.
-
-The cleaned dataset was saved for further analysis.
-
-### 3. Exploratory Data Analysis (EDA)
-
-Performed exploratory data analysis to understand the dataset.
-
-The analysis included:
-
-- Distribution of claim statuses.
-- Distribution of billed amounts.
-- Patient age distribution.
-- Claim status comparisons.
-- Relationships between numerical and categorical features.
-
-Used Matplotlib and Seaborn to create visualizations.
-
-### 4. Feature Engineering
-
-Created additional features to improve the model input:
-
-- **Age Group:** Categorized patients into different age groups.
-- **High Billed Amount:** Identified claims with billed amounts above the training-data median.
-- **Payer Denial Rate:** Calculated the denial rate for each payer using training data only.
-
-### 5. Handling Class Imbalance
-
-The original dataset contains an unequal distribution of claim statuses.
-
-Used SMOTENC to balance the training data because it contains both numerical and categorical features.
-
-SMOTENC was applied only to the training data. The test data was kept unchanged to evaluate the model on the original distribution.
-
-### 6. Model Training
-
-Used the Random Forest Classifier to predict insurance claim outcomes.
-
-A stratified train-test split was performed to maintain the original class distribution in both sets.
-
-A preprocessing pipeline was created using:
-
-- SimpleImputer
-- StandardScaler
-- OneHotEncoder
-- ColumnTransformer
-- SMOTENC
-- Random Forest Classifier
-
-The trained pipeline and required training information were saved using Python's built-in Pickle module.
-
-### 7. Model Evaluation
-
-Evaluated the model using:
-
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Confusion Matrix
-
-These metrics help understand how well the model predicts each claim status.
-
-### 8. Prediction Testing
-
-Created a separate Python file to test the saved model with new claim details.
-
-The program accepts claim information, predicts the claim status, displays class probabilities, and optionally compares the prediction with a known actual status.
-
-### 9. FastAPI Deployment
-
-Created a FastAPI application to make predictions through an API.
-
-The application provides:
-
-- `GET /` – Checks whether the API is running.
-- `POST /predict` – Accepts claim details and returns the predicted status and class probabilities.
-
-Swagger documentation is available at:
-
-`http://127.0.0.1:8000/docs`
 
 ## Project Structure
 
@@ -140,7 +46,13 @@ SkyPa Systems assesment/
 │
 ├── data/
 │   ├── claims_dataset.csv
-│   └── cleaned_claims.csv
+│   ├── cleaned_claims.csv
+│   ├── X_train.csv
+│   ├── X_test.csv
+│   ├── X_train_balanced.csv
+│   ├── y_train.csv
+│   ├── y_test.csv
+│   └── y_train_balanced.csv
 │
 ├── models/
 │   └── claim_pipeline.pkl
@@ -155,7 +67,101 @@ SkyPa Systems assesment/
 └── README.md
 ```
 
-## Installation and Execution
+## Data Preparation
+
+The dataset is generated using Python with synthetic insurance claim details.
+
+The following data preparation steps are performed:
+
+- Checking missing values
+- Checking duplicate records
+- Validating patient age and billed amount
+- Checking unique claim statuses
+- Cleaning and saving the processed dataset
+
+## Exploratory Data Analysis (EDA)
+
+Exploratory Data Analysis is performed to understand the dataset and identify patterns.
+
+The analysis includes:
+
+- Distribution of claim statuses
+- Analysis of insurance payers
+- Analysis of healthcare providers
+- Billed amount distribution
+- Patient age distribution
+- Visualizations using Matplotlib and Seaborn
+
+## Feature Engineering
+
+The following additional features are created:
+
+- `age_group` – Groups patients based on their age.
+- `high_billed_amount` – Identifies claims with higher billed amounts using the training median.
+- `payer_denial_rate` – Calculates the denial rate for each payer using training data.
+
+## Model Development
+
+A Random Forest Classifier is used to predict insurance claim outcomes.
+
+The model development process includes:
+
+1. Separating input features and target variable.
+2. Splitting the data into training and testing sets using stratified sampling.
+3. Handling numerical and categorical features.
+4. Applying SMOTENC to balance the training data.
+5. Training the Random Forest classification model.
+6. Evaluating the model using accuracy, precision, recall, F1-score, and confusion matrix.
+
+The testing data is kept separate from the balancing process.
+
+## Model Evaluation
+
+The model performance is evaluated using:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- Confusion Matrix
+
+These metrics help understand how well the model predicts each claim outcome.
+
+## Model Saving
+
+The trained machine learning pipeline and required metadata are saved using Python's built-in `pickle` module.
+
+Saved model location:
+
+```text
+models/claim_pipeline.pkl
+```
+
+## Prediction Testing
+
+The `test_prediction.py` file allows users to enter claim details manually.
+
+The program displays:
+
+- Predicted claim status
+- Probability of Paid
+- Probability of Partially_Paid
+- Probability of Denied
+
+It can also compare the predicted status with an actual status entered by the user.
+
+## FastAPI Application
+
+FastAPI is used to deploy the trained model through an API.
+
+**Available endpoints:**
+
+- `GET /` – Displays the application information.
+- `POST /predict` – Accepts claim details and returns the predicted claim status with class probabilities.
+
+The API documentation is available through Swagger UI.
+
+## How to Run the Project
 
 ### Step 1: Install the required libraries
 
@@ -199,18 +205,16 @@ python test_prediction.py
 uvicorn app:app --reload
 ```
 
-### Step 8: Open API documentation
-
 Open the following URL in your browser:
 
-`http://127.0.0.1:8000/docs`
+```text
+http://127.0.0.1:8000/docs
+```
 
-Use the POST `/predict` endpoint to submit claim details and receive a prediction.
+Use the `POST /predict` endpoint to test the model with new claim details.
 
 ## Conclusion
 
-Through this project, I worked on the complete machine learning workflow, starting from synthetic data generation and data cleaning to exploratory analysis, feature engineering, model training, evaluation, and API deployment.
+This project demonstrates an end-to-end machine learning workflow for insurance claim outcome prediction, starting from synthetic data generation and preprocessing to model training, evaluation, prediction, and API deployment.
 
-This project helped me understand how machine learning models can be developed and exposed through APIs for making predictions.
-
-**Note:** This project uses synthetic data and illustrative risk rules. Its predictions are for assessment and demonstration purposes and should not be treated as actual insurance claim decisions.
+The project was developed as part of the SkyPa Systems assessment. Since the dataset is synthetic, the predictions are intended for demonstration and learning purposes only.
