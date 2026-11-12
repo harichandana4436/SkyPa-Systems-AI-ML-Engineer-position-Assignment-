@@ -1,1 +1,0 @@
-# SkyPa-Systems-AI-ML-Engineer-position-Assignment-
